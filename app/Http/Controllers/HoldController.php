@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\InsufficientStockException;
+use App\Http\Controllers\Concerns\ApiResponse;
 use App\Http\Requests\CreateHoldRequest;
 use App\Http\Resources\HoldResource;
 use App\Services\HoldService;
@@ -10,6 +11,8 @@ use Illuminate\Http\JsonResponse;
 
 class HoldController extends Controller
 {
+    use ApiResponse;
+
     public function __construct(
         private HoldService $holdService
     ) {}
@@ -17,7 +20,7 @@ class HoldController extends Controller
     /**
      * Store a newly created hold.
      */
-    public function store(CreateHoldRequest $request): JsonResponse|HoldResource
+    public function store(CreateHoldRequest $request): JsonResponse
     {
         try {
             $hold = $this->holdService->createHold(
@@ -25,11 +28,9 @@ class HoldController extends Controller
                 $request->validated()['qty']
             );
 
-            return (new HoldResource($hold))->response()->setStatusCode(201);
+            return $this->createdResponse(new HoldResource($hold));
         } catch (InsufficientStockException $e) {
-            return response()->json([
-                'message' => $e->getMessage(),
-            ], 422);
+            return $this->validationErrorResponse($e->getMessage());
         }
     }
 }

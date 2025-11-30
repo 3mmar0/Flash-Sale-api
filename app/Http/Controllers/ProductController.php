@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\ApiResponse;
 use App\Http\Resources\ProductResource;
-use App\Models\Product;
 use App\Services\StockService;
 use Illuminate\Http\JsonResponse;
 
 class ProductController extends Controller
 {
+    use ApiResponse;
+
     public function __construct(
         private StockService $stockService
-    ) {
-    }
+    ) {}
 
     /**
      * Display the specified product.
@@ -22,7 +23,7 @@ class ProductController extends Controller
         $product = $this->stockService->getCachedProduct($id);
 
         if (!$product) {
-            return response()->json(['message' => 'Product not found'], 404);
+            return $this->notFoundResponse('Product not found');
         }
 
         // Ensure available_stock is calculated (this will use cache)
@@ -31,4 +32,3 @@ class ProductController extends Controller
         return new ProductResource($product);
     }
 }
-

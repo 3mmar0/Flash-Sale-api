@@ -19,33 +19,53 @@ class PaymentWebhookService
     /**
      * Process webhook idempotently.
      * Handles duplicates and out-of-order webhooks.
+     * Thread-safe for concurrent requests with same idempotency key.
      */
     public function processWebhook(string $idempotencyKey, int $orderId, string $status): array
     {
-        // Check for duplicate webhook
-        $existingLog = WebhookLog::where('idempotency_key', $idempotencyKey)->first();
-
-        if ($existingLog) {
-            Log::info('Duplicate webhook detected', [
-                'idempotency_key' => $idempotencyKey,
-                'order_id' => $orderId,
-            ]);
-
-            return $this->handleWebhookDuplicate($existingLog);
-        }
-
         return DB::transaction(function () use ($idempotencyKey, $orderId, $status) {
-            // Store webhook log first
-            $webhookLog = WebhookLog::create([
-                'idempotency_key' => $idempotencyKey,
-                'order_id' => $orderId,
-                'payload' => [
+            // Check for duplicate webhook WITHIN transaction to prevent race conditions
+            // Use lockForUpdate to prevent concurrent processing of same idempotency key
+            $existingLog = WebhookLog::where('idempotency_key', $idempotencyKey)
+                ->lockForUpdate()
+                ->first();
+
+            if ($existingLog) {
+                Log::info('Duplicate webhook detected', [
+                    'idempotency_key' => $idempotencyKey,
                     'order_id' => $orderId,
-                    'status' => $status,
-                ],
-                'status' => 'processed',
-                'processed_at' => now(),
-            ]);
+                ]);
+
+                return $this->handleWebhookDuplicate($existingLog);
+            }
+
+            // Try to create webhook log - handle unique constraint violation gracefully
+            try {
+                $webhookLog = WebhookLog::create([
+                    'idempotency_key' => $idempotencyKey,
+                    'order_id' => $orderId,
+                    'payload' => [
+                        'order_id' => $orderId,
+                        'status' => $status,
+                    ],
+                    'status' => 'processed',
+                    'processed_at' => now(),
+                ]);
+            } catch (\Illuminate\Database\QueryException $e) {
+                // Handle race condition: if another request created the log between check and create
+                if ($e->getCode() === '23000' || str_contains($e->getMessage(), 'Duplicate entry')) {
+                    // Unique constraint violation - another request processed this webhook
+                    $existingLog = WebhookLog::where('idempotency_key', $idempotencyKey)->first();
+                    if ($existingLog) {
+                        Log::info('Duplicate webhook detected (race condition handled)', [
+                            'idempotency_key' => $idempotencyKey,
+                            'order_id' => $orderId,
+                        ]);
+                        return $this->handleWebhookDuplicate($existingLog);
+                    }
+                }
+                throw $e; // Re-throw if it's a different error
+            }
 
             // Try to find the order
             $order = Order::find($orderId);
@@ -95,6 +115,22 @@ class PaymentWebhookService
             'order_status' => $order?->status,
             'processed_at' => $webhookLog->processed_at,
         ];
+    }
+
+    /**
+     * Process webhook payload directly (for pending webhooks).
+     * Skips idempotency check since webhook was already stored.
+     */
+    public function processWebhookPayload(Order $order, string $status): void
+    {
+        DB::transaction(function () use ($order, $status) {
+            // Process the webhook based on status
+            if ($status === 'success') {
+                $this->handleSuccess($order);
+            } else {
+                $this->handleFailure($order);
+            }
+        });
     }
 
     /**

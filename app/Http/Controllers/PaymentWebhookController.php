@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\ApiResponse;
 use App\Http\Requests\WebhookRequest;
 use App\Services\PaymentWebhookService;
 use Illuminate\Http\JsonResponse;
 
 class PaymentWebhookController extends Controller
 {
+    use ApiResponse;
+
     public function __construct(
         private PaymentWebhookService $webhookService
-    ) {
-    }
+    ) {}
 
     /**
      * Handle payment webhook.
@@ -28,7 +30,6 @@ class PaymentWebhookController extends Controller
         );
 
         // Always return 200 OK as per requirements
-        return response()->json($result, 200);
+        return $this->okResponse($result);
     }
 }
-

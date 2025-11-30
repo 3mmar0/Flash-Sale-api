@@ -25,7 +25,7 @@ This API implements a flash sale system that:
 1. Clone the repository:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/3mmar0/Flash-Sale-api.git
 cd Flash-Sale-api
 ```
 
@@ -291,6 +291,28 @@ php artisan queue:work
 ```bash
 php artisan schedule:work
 ```
+
+## Load Testing with Postman
+
+For detailed instructions on testing load balancing, concurrency, and high-traffic scenarios, see:
+
+📖 **[POSTMAN_LOAD_TESTING_GUIDE.md](POSTMAN_LOAD_TESTING_GUIDE.md)**
+
+**Quick Load Test:**
+
+```bash
+# Install dependencies
+npm install axios
+
+# Run load test script
+node load-test.js
+```
+
+This will send 50 concurrent hold requests and verify:
+
+-   ✅ No overselling occurs
+-   ✅ Response times are acceptable
+-   ✅ Stock calculations are correct
 
 ## Testing
 

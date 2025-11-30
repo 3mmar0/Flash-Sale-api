@@ -91,26 +91,22 @@ class OrderService
         foreach ($pendingWebhooks as $webhookLog) {
             $payload = $webhookLog->payload;
             $status = $payload['status'] ?? null;
-            $idempotencyKey = $webhookLog->idempotency_key;
 
             if ($status) {
                 try {
-                    // Process the webhook now that order exists
-                    $this->webhookService->processWebhook(
-                        $idempotencyKey,
-                        $order->id,
-                        $status
-                    );
+                    // Process the webhook payload directly now that order exists
+                    // We skip the idempotency check since this is a pending webhook that was already stored
+                    $this->webhookService->processWebhookPayload($order, $status);
 
                     Log::info('Processed pending webhook after order creation', [
                         'order_id' => $order->id,
-                        'idempotency_key' => $idempotencyKey,
+                        'idempotency_key' => $webhookLog->idempotency_key,
                         'status' => $status,
                     ]);
                 } catch (\Exception $e) {
                     Log::error('Failed to process pending webhook', [
                         'order_id' => $order->id,
-                        'idempotency_key' => $idempotencyKey,
+                        'idempotency_key' => $webhookLog->idempotency_key,
                         'error' => $e->getMessage(),
                     ]);
                 }
