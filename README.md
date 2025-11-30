@@ -2,6 +2,33 @@
 
 A high-concurrency Flash Sale Checkout System built with Laravel 12, designed to handle burst traffic while preventing overselling, managing temporary inventory holds, and processing idempotent payment webhooks.
 
+## 🌐 Live Server
+
+**Postman Collection:** https://documenter.getpostman.com/view/17857372/2sB3dLUryx
+**Production API:** https://flash.ammarelgendy.site/api
+
+**Quick Test:**
+
+```bash
+# Test product endpoint
+curl https://flash.ammarelgendy.site/api/products/1
+
+# Test hold creation
+curl -X POST https://flash.ammarelgendy.site/api/holds \
+  -H "Content-Type: application/json" \
+  -d '{"product_id": 1, "qty": 1}'
+```
+
+**Load Testing:**
+
+```bash
+# Update load-test.js BASE_URL to production URL
+node load-test.js product  # Test product API
+node load-test.js hold      # Test hold creation
+```
+
+---
+
 ## Overview
 
 This API implements a flash sale system that:
@@ -18,6 +45,9 @@ This API implements a flash sale system that:
 -   Laravel 12
 -   MySQL (InnoDB)
 -   Redis (recommended) or any Laravel cache driver (database/file/memcached)
+-   **Free Redis Hosting**: Use Upstash, Redis Cloud, or Railway (see `FREE_REDIS_HOSTING_GUIDE.md`)
+-   **Local Redis**: Install locally or use Docker
+-   **No Redis**: Use database cache (slower but works)
 -   Predis package (included via composer)
 
 ## Installation
@@ -105,25 +135,46 @@ php artisan db:seed
 
     > **Note:** The system uses Predis (pure PHP Redis client) - no PHP extension needed!
 
-9. Start the queue worker (for hold expiration):
+9. Start the queue worker and scheduler:
+
+**Option 1: Run both in one command (background):**
+
+```bash
+php artisan queue:work & php artisan schedule:work
+```
+
+**Option 2: Using composer script (recommended):**
+
+```bash
+composer run worker
+```
+
+**Option 3: Run separately (if needed):**
 
 ```bash
 php artisan queue:work
-```
-
-10. Start the scheduler (for scheduled jobs):
-
-```bash
+# In another terminal:
 php artisan schedule:work
 ```
 
-Or use the combined dev command:
+**For production server (with nohup):**
+
+```bash
+nohup php artisan queue:work > /dev/null 2>&1 & nohup php artisan schedule:work > /dev/null 2>&1 &
+```
+
+**Or use the combined dev command (includes server):**
 
 ```bash
 composer run dev
 ```
 
 ## API Endpoints
+
+**Base URLs:**
+
+-   **Local Development:** `http://localhost:8000/api`
+-   **Production Server:** `https://flash.ammarelgendy.site/api`
 
 ### GET /api/products/{id}
 
@@ -143,6 +194,20 @@ Get product details with available stock.
 ### POST /api/holds
 
 Create a temporary hold on inventory.
+
+**Example Request:**
+
+```bash
+# Local
+curl -X POST http://localhost:8000/api/holds \
+  -H "Content-Type: application/json" \
+  -d '{"product_id": 1, "qty": 1}'
+
+# Production
+curl -X POST https://flash.ammarelgendy.site/api/holds \
+  -H "Content-Type: application/json" \
+  -d '{"product_id": 1, "qty": 1}'
+```
 
 **Request Body:**
 

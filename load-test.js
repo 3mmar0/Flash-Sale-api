@@ -11,7 +11,12 @@ import axios from "axios";
 
 // Configuration
 const CONFIG = {
-    BASE_URL: "http://localhost:8000/api",
+    // Local development
+    // BASE_URL: "http://localhost:8000/api",
+
+    // Production server
+    BASE_URL: "https://flash.ammarelgendy.site/api",
+
     PRODUCT_ID: 1,
     CONCURRENT_REQUESTS: 50,
     QTY_PER_REQUEST: 1,
