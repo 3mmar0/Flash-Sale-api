@@ -1,0 +1,498 @@
+{
+    "info": {
+        "name": "Flash Sale API",
+        "description": "Complete API collection for Flash Sale Checkout System",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Products",
+            "item": [
+                {
+                    "name": "Get Product",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/products/{{product_id}}",
+                            "host": ["{{base_url}}"],
+                            "path": ["products", "{{product_id}}"]
+                        },
+                        "description": "Get product details with available stock"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Holds",
+            "item": [
+                {
+                    "name": "Create Hold",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.environment.set(\"hold_id\", jsonData.data.hold_id);",
+                                    "    pm.test(\"Hold created successfully\", function () {",
+                                    "        pm.response.to.have.status(201);",
+                                    "        pm.expect(jsonData.data).to.have.property('hold_id');",
+                                    "        pm.expect(jsonData.data).to.have.property('expires_at');",
+                                    "    });",
+                                    "} else {",
+                                    "    pm.test(\"Request failed\", function () {",
+                                    "        pm.expect(pm.response.code).to.be.oneOf([201, 422]);",
+                                    "    });",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"product_id\": {{product_id}},\n    \"qty\": 2\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/holds",
+                            "host": ["{{base_url}}"],
+                            "path": ["holds"]
+                        },
+                        "description": "Create a temporary hold on inventory (expires in 2 minutes)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Hold - Insufficient Stock",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"product_id\": {{product_id}},\n    \"qty\": 1000\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/holds",
+                            "host": ["{{base_url}}"],
+                            "path": ["holds"]
+                        },
+                        "description": "Test insufficient stock scenario"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Orders",
+            "item": [
+                {
+                    "name": "Create Order",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.environment.set(\"order_id\", jsonData.data.order_id);",
+                                    "    pm.test(\"Order created successfully\", function () {",
+                                    "        pm.response.to.have.status(201);",
+                                    "        pm.expect(jsonData.data.status).to.eql('pending_payment');",
+                                    "    });",
+                                    "} else {",
+                                    "    pm.test(\"Request failed\", function () {",
+                                    "        pm.expect(pm.response.code).to.be.oneOf([201, 422]);",
+                                    "    });",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"hold_id\": {{hold_id}}\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/orders",
+                            "host": ["{{base_url}}"],
+                            "path": ["orders"]
+                        },
+                        "description": "Create an order from a valid hold"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Order - Invalid Hold",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"hold_id\": 99999\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/orders",
+                            "host": ["{{base_url}}"],
+                            "path": ["orders"]
+                        },
+                        "description": "Test invalid hold scenario"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Webhooks",
+            "item": [
+                {
+                    "name": "Payment Webhook - Success",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "pm.environment.set(\"idempotency_key\", \"test-key-\" + Date.now());"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Webhook processed\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('status');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"idempotency_key\": \"{{idempotency_key}}\",\n    \"order_id\": {{order_id}},\n    \"status\": \"success\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/payments/webhook",
+                            "host": ["{{base_url}}"],
+                            "path": ["payments", "webhook"]
+                        },
+                        "description": "Process successful payment webhook"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Payment Webhook - Failure",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "pm.environment.set(\"idempotency_key\", \"test-key-\" + Date.now());"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"idempotency_key\": \"{{idempotency_key}}\",\n    \"order_id\": {{order_id}},\n    \"status\": \"failure\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/payments/webhook",
+                            "host": ["{{base_url}}"],
+                            "path": ["payments", "webhook"]
+                        },
+                        "description": "Process failed payment webhook (cancels order and restores stock)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Payment Webhook - Duplicate (Idempotency Test)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"idempotency_key\": \"duplicate-test-key\",\n    \"order_id\": {{order_id}},\n    \"status\": \"success\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/payments/webhook",
+                            "host": ["{{base_url}}"],
+                            "path": ["payments", "webhook"]
+                        },
+                        "description": "Test webhook idempotency - send same request twice, second should return duplicate status"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Complete Flow",
+            "item": [
+                {
+                    "name": "1. Get Product",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/products/{{product_id}}",
+                            "host": ["{{base_url}}"],
+                            "path": ["products", "{{product_id}}"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "2. Create Hold",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"product_id\": {{product_id}},\n    \"qty\": 2\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/holds",
+                            "host": ["{{base_url}}"],
+                            "path": ["holds"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "3. Create Order",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"hold_id\": {{hold_id}}\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/orders",
+                            "host": ["{{base_url}}"],
+                            "path": ["orders"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "4. Payment Webhook Success",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"idempotency_key\": \"flow-test-\" + Date.now(),\n    \"order_id\": {{order_id}},\n    \"status\": \"success\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/payments/webhook",
+                            "host": ["{{base_url}}"],
+                            "path": ["payments", "webhook"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "5. Verify Product Stock",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/products/{{product_id}}",
+                            "host": ["{{base_url}}"],
+                            "path": ["products", "{{product_id}}"]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8000/api",
+            "type": "string"
+        },
+        {
+            "key": "product_id",
+            "value": "1",
+            "type": "string"
+        },
+        {
+            "key": "hold_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "order_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "idempotency_key",
+            "value": "",
+            "type": "string"
+        }
+    ]
+}
