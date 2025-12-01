@@ -206,12 +206,6 @@ curl https://flash.ammarelgendy.site/api/products
             "available_stock": 42
         }
     ],
-    "links": {
-        "first": "http://localhost:8000/api/products?page=1",
-        "last": "http://localhost:8000/api/products?page=1",
-        "prev": null,
-        "next": null
-    },
     "meta": {
         "current_page": 1,
         "from": 1,
@@ -280,8 +274,14 @@ curl https://flash.ammarelgendy.site/api/holds
             "updated_at": "2025-11-28T14:28:00Z"
         }
     ],
-    "links": {...},
-    "meta": {...}
+    "meta": {
+        "current_page": 1,
+        "from": 1,
+        "last_page": 1,
+        "per_page": 15,
+        "to": 1,
+        "total": 1
+    }
 }
 ```
 
@@ -363,8 +363,14 @@ curl https://flash.ammarelgendy.site/api/orders
             "updated_at": "2025-11-28T14:30:00Z"
         }
     ],
-    "links": {...},
-    "meta": {...}
+    "meta": {
+        "current_page": 1,
+        "from": 1,
+        "last_page": 1,
+        "per_page": 15,
+        "to": 1,
+        "total": 1
+    }
 }
 ```
 
