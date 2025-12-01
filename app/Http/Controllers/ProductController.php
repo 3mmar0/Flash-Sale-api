@@ -8,7 +8,6 @@ use App\Http\Resources\ProductResourceCollection;
 use App\Models\Product;
 use App\Services\StockService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
@@ -25,22 +24,10 @@ class ProductController extends Controller
     {
         $products = Product::paginate(15);
 
-        // Get all product IDs from the current page
-        $productIds = $products->pluck('id')->toArray();
-
-        // Calculate active holds quantity for all products in one query (avoid N+1)
-        $activeHoldsByProduct = DB::table('holds')
-            ->whereIn('product_id', $productIds)
-            ->where('status', 'active')
-            ->groupBy('product_id')
-            ->select('product_id', DB::raw('SUM(qty) as total_qty'))
-            ->pluck('total_qty', 'product_id')
-            ->toArray();
-
-        // Calculate available_stock for each product without N+1 queries
-        $products->getCollection()->transform(function ($product) use ($activeHoldsByProduct) {
-            $activeHoldsQty = (int) ($activeHoldsByProduct[$product->id] ?? 0);
-            $product->available_stock = max(0, $product->stock - $activeHoldsQty);
+        // Calculate available_stock for each product using cached method
+        // This ensures consistency with the show() method and uses cache for performance
+        $products->getCollection()->transform(function ($product) {
+            $product->available_stock = $this->stockService->calculateAvailableStock($product);
             return $product;
         });
 
