@@ -4,7 +4,8 @@ A high-concurrency Flash Sale Checkout System built with Laravel 12, designed to
 
 ## 🌐 Live Server
 
-**Postman Collection:** https://documenter.getpostman.com/view/17857372/2sB3dLUryx
+**Postman Collection:** https://documenter.getpostman.com/view/17857372/2sB3dLUrz4
+
 **Production API:** https://flash.ammarelgendy.site/api
 
 **Quick Test:**
