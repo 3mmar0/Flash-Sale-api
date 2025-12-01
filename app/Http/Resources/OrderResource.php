@@ -33,4 +33,15 @@ class OrderResource extends JsonResource
             'updated_at' => $this->updated_at->toIso8601String(),
         ];
     }
+
+    /**
+     * Create a new resource collection instance.
+     *
+     * @param  mixed  $resource
+     * @return \App\Http\Resources\OrderResourceCollection
+     */
+    public static function collection($resource)
+    {
+        return new OrderResourceCollection($resource);
+    }
 }

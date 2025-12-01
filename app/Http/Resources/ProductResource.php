@@ -21,5 +21,16 @@ class ProductResource extends JsonResource
             'available_stock' => $this->available_stock,
         ];
     }
+
+    /**
+     * Create a new resource collection instance.
+     *
+     * @param  mixed  $resource
+     * @return \App\Http\Resources\ProductResourceCollection
+     */
+    public static function collection($resource)
+    {
+        return new ProductResourceCollection($resource);
+    }
 }
 

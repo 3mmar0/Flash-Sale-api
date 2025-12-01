@@ -37,4 +37,15 @@ class HoldResource extends JsonResource
             'updated_at' => $this->updated_at->toIso8601String(),
         ];
     }
+
+    /**
+     * Create a new resource collection instance.
+     *
+     * @param  mixed  $resource
+     * @return \App\Http\Resources\HoldResourceCollection
+     */
+    public static function collection($resource)
+    {
+        return new HoldResourceCollection($resource);
+    }
 }
