@@ -176,6 +176,53 @@ composer run dev
 -   **Local Development:** `http://localhost:8000/api`
 -   **Production Server:** `https://flash.ammarelgendy.site/api`
 
+### GET /api/products
+
+Get a paginated list of all products with available stock.
+
+**Example Request:**
+
+```bash
+# Local
+curl http://localhost:8000/api/products
+
+# Production
+curl https://flash.ammarelgendy.site/api/products
+```
+
+**Query Parameters:**
+
+-   `page` (optional): Page number for pagination (default: 1)
+
+**Response:**
+
+```json
+{
+    "data": [
+        {
+            "id": 1,
+            "name": "Flash Sale Product",
+            "price": 150.0,
+            "available_stock": 42
+        }
+    ],
+    "links": {
+        "first": "http://localhost:8000/api/products?page=1",
+        "last": "http://localhost:8000/api/products?page=1",
+        "prev": null,
+        "next": null
+    },
+    "meta": {
+        "current_page": 1,
+        "from": 1,
+        "last_page": 1,
+        "per_page": 15,
+        "to": 1,
+        "total": 1
+    }
+}
+```
+
 ### GET /api/products/{id}
 
 Get product details with available stock.
@@ -188,6 +235,53 @@ Get product details with available stock.
     "name": "Flash Sale Product",
     "price": 150.0,
     "available_stock": 42
+}
+```
+
+### GET /api/holds
+
+Get a paginated list of all holds with product and order information.
+
+**Example Request:**
+
+```bash
+# Local
+curl http://localhost:8000/api/holds
+
+# Production
+curl https://flash.ammarelgendy.site/api/holds
+```
+
+**Query Parameters:**
+
+-   `page` (optional): Page number for pagination (default: 1)
+
+**Response:**
+
+```json
+{
+    "data": [
+        {
+            "hold_id": 123,
+            "product_id": 1,
+            "qty": 2,
+            "status": "active",
+            "expires_at": "2025-11-28T14:30:00Z",
+            "product": {
+                "id": 1,
+                "name": "Flash Sale Product",
+                "price": 150.0
+            },
+            "order": {
+                "order_id": 567,
+                "status": "pending_payment"
+            },
+            "created_at": "2025-11-28T14:28:00Z",
+            "updated_at": "2025-11-28T14:28:00Z"
+        }
+    ],
+    "links": {...},
+    "meta": {...}
 }
 ```
 
@@ -230,6 +324,49 @@ curl -X POST https://flash.ammarelgendy.site/api/holds \
 **Errors:**
 
 -   `422`: Insufficient stock available
+
+### GET /api/orders
+
+Get a paginated list of all orders with hold and product information.
+
+**Example Request:**
+
+```bash
+# Local
+curl http://localhost:8000/api/orders
+
+# Production
+curl https://flash.ammarelgendy.site/api/orders
+```
+
+**Query Parameters:**
+
+-   `page` (optional): Page number for pagination (default: 1)
+
+**Response:**
+
+```json
+{
+    "data": [
+        {
+            "order_id": 567,
+            "status": "pending_payment",
+            "payment_reference": null,
+            "hold_id": 123,
+            "product": {
+                "id": 1,
+                "name": "Flash Sale Product",
+                "price": 150.0
+            },
+            "qty": 2,
+            "created_at": "2025-11-28T14:30:00Z",
+            "updated_at": "2025-11-28T14:30:00Z"
+        }
+    ],
+    "links": {...},
+    "meta": {...}
+}
+```
 
 ### POST /api/orders
 

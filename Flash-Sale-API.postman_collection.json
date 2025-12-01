@@ -9,6 +9,52 @@
             "name": "Products",
             "item": [
                 {
+                    "name": "List Products",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"List products successful\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('data');",
+                                    "    pm.expect(jsonData).to.have.property('meta');",
+                                    "    if (jsonData.data.length > 0) {",
+                                    "        pm.expect(jsonData.data[0]).to.have.property('id');",
+                                    "        pm.expect(jsonData.data[0]).to.have.property('available_stock');",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/products?page=1",
+                            "host": ["{{base_url}}"],
+                            "path": ["products"],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number (optional)"
+                                }
+                            ]
+                        },
+                        "description": "Get a paginated list of all products with available stock"
+                    },
+                    "response": []
+                },
+                {
                     "name": "Get Product",
                     "request": {
                         "method": "GET",
@@ -27,6 +73,53 @@
         {
             "name": "Holds",
             "item": [
+                {
+                    "name": "List Holds",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"List holds successful\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('data');",
+                                    "    pm.expect(jsonData).to.have.property('meta');",
+                                    "    if (jsonData.data.length > 0) {",
+                                    "        pm.expect(jsonData.data[0]).to.have.property('hold_id');",
+                                    "        pm.expect(jsonData.data[0]).to.have.property('status');",
+                                    "        pm.expect(jsonData.data[0]).to.have.property('expires_at');",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/holds?page=1",
+                            "host": ["{{base_url}}"],
+                            "path": ["holds"],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number (optional)"
+                                }
+                            ]
+                        },
+                        "description": "Get a paginated list of all holds with product and order information"
+                    },
+                    "response": []
+                },
                 {
                     "name": "Create Hold",
                     "event": [
@@ -119,6 +212,52 @@
         {
             "name": "Orders",
             "item": [
+                {
+                    "name": "List Orders",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"List orders successful\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('data');",
+                                    "    pm.expect(jsonData).to.have.property('meta');",
+                                    "    if (jsonData.data.length > 0) {",
+                                    "        pm.expect(jsonData.data[0]).to.have.property('order_id');",
+                                    "        pm.expect(jsonData.data[0]).to.have.property('status');",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/orders?page=1",
+                            "host": ["{{base_url}}"],
+                            "path": ["orders"],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number (optional)"
+                                }
+                            ]
+                        },
+                        "description": "Get a paginated list of all orders with hold and product information"
+                    },
+                    "response": []
+                },
                 {
                     "name": "Create Order",
                     "event": [

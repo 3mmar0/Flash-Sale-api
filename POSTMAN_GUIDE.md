@@ -38,7 +38,44 @@ http://localhost:8000/api
 
 ## Endpoints
 
-### 1. Get Product Details
+### 1. List Products
+
+**GET** `/api/products`
+
+Get a paginated list of all products with available stock.
+
+**Example Request:**
+
+```
+GET http://localhost:8000/api/products?page=1
+```
+
+**Query Parameters:**
+
+-   `page` (optional): Page number for pagination (default: 1)
+
+**Response:**
+
+```json
+{
+    "data": [
+        {
+            "id": 1,
+            "name": "Flash Sale Product",
+            "price": 150.0,
+            "available_stock": 42
+        }
+    ],
+    "links": {...},
+    "meta": {
+        "current_page": 1,
+        "per_page": 15,
+        "total": 1
+    }
+}
+```
+
+### 2. Get Product Details
 
 **GET** `/api/products/{id}`
 
@@ -69,7 +106,60 @@ GET http://localhost:8000/api/products/1
 
 ---
 
-### 2. Create Hold
+### 3. List Holds
+
+**GET** `/api/holds`
+
+Get a paginated list of all holds with product and order information.
+
+**Example Request:**
+
+```
+GET http://localhost:8000/api/holds?page=1
+```
+
+**Query Parameters:**
+
+-   `page` (optional): Page number for pagination (default: 1)
+
+**Response:**
+
+```json
+{
+    "data": [
+        {
+            "hold_id": 123,
+            "product_id": 1,
+            "qty": 2,
+            "status": "active",
+            "expires_at": "2025-11-28T14:30:00Z",
+            "product": {
+                "id": 1,
+                "name": "Flash Sale Product",
+                "price": 150.0
+            },
+            "order": {
+                "order_id": 567,
+                "status": "pending_payment"
+            },
+            "created_at": "2025-11-28T14:28:00Z",
+            "updated_at": "2025-11-28T14:28:00Z"
+        }
+    ],
+    "links": {...},
+    "meta": {...}
+}
+```
+
+**Postman Setup:**
+
+-   Method: `GET`
+-   URL: `http://localhost:8000/api/holds?page=1`
+-   Headers: `Accept: application/json`
+
+---
+
+### 4. Create Hold
 
 **POST** `/api/holds`
 
@@ -118,7 +208,48 @@ GET http://localhost:8000/api/products/1
 
 ---
 
-### 3. Create Order
+### 5. List Orders
+
+**GET** `/api/orders`
+
+Get a paginated list of all orders with hold and product information.
+
+**Example Request:**
+
+```
+GET http://localhost:8000/api/orders?page=1
+```
+
+**Query Parameters:**
+
+-   `page` (optional): Page number for pagination (default: 1)
+
+**Response:**
+
+```json
+{
+    "data": [
+        {
+            "order_id": 567,
+            "status": "pending_payment",
+            "payment_reference": null,
+            "hold_id": 123,
+            "product": {
+                "id": 1,
+                "name": "Flash Sale Product",
+                "price": 150.0
+            },
+            "qty": 2,
+            "created_at": "2025-11-28T14:30:00Z",
+            "updated_at": "2025-11-28T14:30:00Z"
+        }
+    ],
+    "links": {...},
+    "meta": {...}
+}
+```
+
+### 6. Create Order
 
 **POST** `/api/orders`
 
@@ -165,7 +296,7 @@ GET http://localhost:8000/api/products/1
 
 ---
 
-### 4. Payment Webhook
+### 7. Payment Webhook
 
 **POST** `/api/payments/webhook`
 
