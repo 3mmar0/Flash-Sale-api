@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\ApiResponse;
 use App\Http\Resources\ProductResource;
+use App\Http\Resources\ProductResourceCollection;
 use App\Models\Product;
 use App\Services\StockService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
@@ -21,7 +21,7 @@ class ProductController extends Controller
     /**
      * Display a listing of products.
      */
-    public function index(): AnonymousResourceCollection
+    public function index(): ProductResourceCollection
     {
         $products = Product::paginate(15);
 

@@ -6,10 +6,10 @@ use App\Exceptions\InvalidHoldException;
 use App\Http\Controllers\Concerns\ApiResponse;
 use App\Http\Requests\CreateOrderRequest;
 use App\Http\Resources\OrderResource;
+use App\Http\Resources\OrderResourceCollection;
 use App\Models\Order;
 use App\Services\OrderService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class OrderController extends Controller
 {
@@ -22,7 +22,7 @@ class OrderController extends Controller
     /**
      * Display a listing of orders.
      */
-    public function index(): AnonymousResourceCollection
+    public function index(): OrderResourceCollection
     {
         // Eager load hold and hold.product to avoid N+1 queries
         $orders = Order::with(['hold.product'])->latest()->paginate(15);
